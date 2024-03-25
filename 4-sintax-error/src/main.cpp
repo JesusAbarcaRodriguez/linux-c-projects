@@ -4,15 +4,23 @@
 #include <stack>
 #include <vector>
 using namespace std;
+
 stack<char> keys;
 stack<char> parenthesis;
 stack<char> corchetes;
+
+stack<int> numberLineKeys;
+stack<int> numberLineParenthesis;
+stack<int> numberLineCorchetes;
+
 int numberLine = 1;
-void validKeys(char c);
-void validParenthesis(char c);
-void validCorchetes(char c);
-int main()
-{
+
+template<typename T>
+void validSymbols(char c, stack<T>& symbols, stack<int>& numberLineSymbols, const T& openSymbol, const string& errorMessage);
+template<typename T>
+void printAndPopErrors(stack<T>& symbols, stack<int>& numberLineSymbols, const string& errorMessage);
+
+int main(){
     string fileName = "file.c";
     ifstream file(fileName);
 
@@ -27,88 +35,38 @@ int main()
         for (char c : line)
         {
             if (c == '{' || c == '}')
-            {validKeys(c);}
+            {validSymbols(c, keys, numberLineKeys, '{', "{}");}
             else if (c == '(' || c == ')')
-            {validParenthesis(c);}
+            {validSymbols(c, parenthesis, numberLineParenthesis, '(', "()");}
             else if (c == '[' || c == ']')
-            {validCorchetes(c);}
+            {validSymbols(c, parenthesis, numberLineParenthesis, '[', "[]");}
         }
         numberLine++;
     }
+    printAndPopErrors(keys, numberLineKeys, "{}");
+    printAndPopErrors(parenthesis, numberLineParenthesis, "()");
+    printAndPopErrors(corchetes, numberLineCorchetes, "[]");
 
     file.close();
     return 0;
 }
-void validKeys(char c)
-{
-    if (c == '{')
-    {
-        keys.push(c);
-    }
-    else if (c == '}')
-    {
-        if (!keys.empty())
-        {
-            if (keys.top() == '}')
-            {
-                cout << "Error en la linea: " << numberLine << " Problemas con: {}" << endl;
-            }
-            keys.pop();
+template<typename T>
+void validSymbols(char c, stack<T>& symbols, stack<int>& numberLineSymbols, const T& openSymbol, const string& errorMessage) {
+    if (c == openSymbol) {
+        symbols.push(c);
+        numberLineSymbols.push(numberLine);
+    } else if (c != openSymbol) {
+        if (!symbols.empty() && !numberLineSymbols.empty()) {
+            symbols.pop();
+            numberLineSymbols.pop();
+        } else {
+            cout << "Error en la línea: " << numberLine << " Problemas con: " << errorMessage << endl;
         }
-        else
-        {
-            cout << "Error en la linea: " << numberLine << " Problemas con: {}" << endl;
-        }
-    }
-}
-void validParenthesis(char c)
-{
-    if (c == '(')
-    {
-        if (!parenthesis.empty() && parenthesis.top() == '(')
-        {
-            cout << "Error en la linea: " << numberLine << " Problemas con: ()" << endl;
-        }
-        else
-        {
-            parenthesis.push(c);
-        }
-    }
-    else if (c == ')')
-    {
-        if (!parenthesis.empty() && parenthesis.top() == ')')
-        {
-            cout << "Error en la linea: " << numberLine << " Problemas con: ()" << endl;
-        }
-        else
-        {
-            parenthesis.pop();
-        }
-    }
-}
-
-void validCorchetes(char c)
-{
-    if (c == '[')
-    {
-        if (!corchetes.empty() && corchetes.top() == '[')
-        {
-            cout << "Error en la linea: " << numberLine << " Problemas con: []" << endl;
-        }
-        else
-        {
-            corchetes.push(c);
-        }
-    }
-    else if (c == ']')
-    {
-        if (!corchetes.empty() && corchetes.top() == ']')
-        {
-            cout << "Error en la linea: " << numberLine << " Problemas con: []" << endl;
-        }
-        else
-        {
-            corchetes.pop();
-        }
-    }
-}
+    }}
+template<typename T>
+void printAndPopErrors(stack<T>& symbols, stack<int>& numberLineSymbols, const string& errorMessage) {
+    while (!symbols.empty() && !numberLineSymbols.empty()) {
+        cout << "Error en la línea: " << numberLineSymbols.top() << " Problemas con: " << errorMessage << endl;
+        symbols.pop();
+        numberLineSymbols.pop();
+    }}

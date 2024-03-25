@@ -1,7 +1,6 @@
-#include <stdio.h>
-#include <stdlib.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <iostream>
 #include <iostream>
 using namespace std;
 void collatz(int n) {
@@ -18,7 +17,15 @@ void collatz(int n) {
 }
 
 int main(int argc, char *argv[]) {
+    if (argc != 2) {
+        cout<<"ERROR, La cantidad de Parametros no es la correcta.\n"<<endl;
+        return 1;
+    }
     int number = atoi(argv[1]);
+    if (number <= 0) {
+        cout<<"Error: La cantidad debe ser un entero positivo.\n"<<endl;
+        return 1;
+    }
     pid_t pid = fork();
 
     if (pid < 0) {

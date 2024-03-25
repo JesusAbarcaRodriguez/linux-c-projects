@@ -4,19 +4,35 @@
 
 using namespace std;
 
-void quicksort(vector<string*>& arr, int left, int right) {
-    if (left < right) {
-        int pivot = right;
-        int partitionIndex = left;
-        for (int i = left; i < right; ++i) {
-            if (*(arr[i]) < *(arr[pivot])) {
-                swap(arr[i], arr[partitionIndex]);
-                ++partitionIndex;
-            }
+void quickSort(vector<string*>& arr, int inicio, int fin) {
+    int izq, der;
+    string* pivote;
+    izq = inicio;
+    der = fin;
+    pivote = arr[(izq + der) / 2];
+    do {
+        while (*(arr[izq]) < *pivote && izq < fin) {
+            izq++;
         }
-        swap(arr[pivot], arr[partitionIndex]);
-        quicksort(arr, left, partitionIndex - 1);
-        quicksort(arr, partitionIndex + 1, right);
+
+        while (*(arr[der]) > *pivote && der > inicio) {
+            der--;
+        }
+
+        if (izq <= der) {
+            swap(arr[izq], arr[der]);
+            izq++;
+            der--;
+        }
+
+    } while (izq <= der);
+
+    if (inicio <= der) {
+        quickSort(arr, inicio, der);
+    }
+
+    if (fin > izq) {
+        quickSort(arr, izq, fin);
     }
 }
 
@@ -29,13 +45,13 @@ int main() {
         lines.push_back(new string(line));
     }
 
-    quicksort(lines, 0, lines.size() - 1);
+    quickSort(lines, 0, lines.size() - 1);
 
+ 
     cout << "\nResultado ordenado:\n";
     for (string* ptr : lines) {
         cout << *ptr << endl;
         delete ptr;
     }
-
     return 0;
 }
